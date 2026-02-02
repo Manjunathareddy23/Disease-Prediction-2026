@@ -4,14 +4,14 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from utils.text_preprocess import clean_text
 
-# load kaggle dataset
+# Load dataset
 data = pd.read_csv("dataset/Training.csv")
 
-# separate symptoms and disease
+# Split input & output
 X = data.drop("prognosis", axis=1)
 y = data["prognosis"]
 
-# convert 0/1 columns → text
+# Convert symptom columns → sentence
 symptom_names = X.columns
 
 def row_to_text(row):
@@ -20,16 +20,16 @@ def row_to_text(row):
 symptom_text = X.apply(row_to_text, axis=1)
 symptom_text = symptom_text.apply(clean_text)
 
-# vectorization
+# Vectorization
 vectorizer = TfidfVectorizer()
 X_vector = vectorizer.fit_transform(symptom_text)
 
-# model
+# Train model
 model = LogisticRegression(max_iter=1000)
 model.fit(X_vector, y)
 
-# save model
+# Save model
 pickle.dump(model, open("models/text_model.pkl", "wb"))
 pickle.dump(vectorizer, open("models/vectorizer.pkl", "wb"))
 
-print("✅ Model trained using Kaggle dataset")
+print("✅ Model trained successfully")

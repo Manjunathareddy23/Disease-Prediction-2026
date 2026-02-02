@@ -2,27 +2,40 @@ import streamlit as st
 import pickle
 from utils.text_preprocess import clean_text
 
-st.set_page_config(page_title="Disease Predictor", page_icon="🩺")
+# ---------------- PAGE CONFIG ----------------
+st.set_page_config(
+    page_title="Disease Prediction App",
+    page_icon="🩺",
+    layout="centered"
+)
 
-# load model
+# ---------------- LOAD MODEL ----------------
 model = pickle.load(open("models/text_model.pkl", "rb"))
 vectorizer = pickle.load(open("models/vectorizer.pkl", "rb"))
 
+# ---------------- TITLE ----------------
 st.title("🩺 Disease Prediction System")
-st.write("Enter your symptoms to predict disease")
+st.write("Predict disease based on **symptoms entered by the user**")
 
+# ---------------- INPUT ----------------
 symptoms = st.text_area(
-    "Symptoms (comma separated)",
+    "Enter your symptoms (comma separated)",
     placeholder="fever, headache, nausea"
 )
 
-if st.button("Predict"):
+# ---------------- PREDICTION ----------------
+if st.button("Predict Disease"):
     if symptoms.strip() == "":
-        st.error("Please enter symptoms")
+        st.error("❌ Please enter symptoms")
     else:
-        clean = clean_text(symptoms)
-        vect = vectorizer.transform([clean])
-        result = model.predict(vect)[0]
-        st.success(f"Predicted Disease: **{result}**")
+        clean_symptoms = clean_text(symptoms)
+        vector = vectorizer.transform([clean_symptoms])
 
-st.warning("⚠️ This is for educational purposes only. Consult a doctor.")
+        prediction = model.predict(vector)[0]
+        confidence = model.predict_proba(vector).max() * 100
+
+        st.success(f"🧾 Predicted Disease: **{prediction}**")
+        st.info(f"📊 Confidence: **{confidence:.2f}%**")
+
+# ---------------- DISCLAIMER ----------------
+st.warning("⚠️ This app is for educational purposes only. Consult a doctor.")
